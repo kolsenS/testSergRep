@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>task11 (To Do List)</title>
+    <link rel="stylesheet" href="./font-awesome/css/font-awesome.css">
+    <style>
+      .li{
+        cursor: pointer;
+      }
+      .complited{
+        text-decoration: line-through;
+      }
+    </style>
+  </head>
+  <body>
+
+    <input type="text" name="todo" id="todofield">
+    <input type="submit" id="savetask" value="Save task">
+
+    <h1>To Do List</h1>
+    <ul id="list">
+      <!-- <li>Learn Javascript<input type="text" style="display:none"><i class="fa fa-pencil"></i><i class="fa fa-trash"></i></li> -->
+    </ul>
+
+    <script>
+      const textInput=document.getElementById('todofield');
+      const saveBtn=document.getElementById('savetask');
+      const todoList=document.getElementById('list');
+      let todos=[];
+      // localStorage.clear();
+      restoreStatusList();
+
+
+      saveBtn.addEventListener('click', (event) => saveToDo(event));
+      todoList.addEventListener('click', (event) => handleclick(event));
+
+      function saveStatusList() {
+        localStorage.setItem('statusList',todos.length);
+        for (var i = 0; i < todos.length; i++) {
+          localStorage['saveList.'+i]=todos[i];
+        }
+        return true;
+      }
+
+      function restoreStatusList() {
+        if (localStorage.getItem('statusList') && localStorage.getItem('statusList')!='0') {
+          for (var i = 0; i < +localStorage.getItem('statusList'); i++) {
+            todos[i]=localStorage['saveList.'+i];
+            const resLi=document.createElement('li');
+            const editInput=document.createElement('input');
+            editInput.style.display='none';
+            resLi.innerText=todos[i];
+            resLi.appendChild(editInput);
+            resLi.appendChild(createEditBtn());
+            resLi.appendChild(createDeleteBtn());
+            todoList.appendChild(resLi);
+          }
+        }
+        return true;
+      }
+
+      function saveToDo(event) {
+        event.preventDefault();
+        const todoText=textInput.value;
+        const newLi=document.createElement('li');
+        const editInput=document.createElement('input');
+        editInput.style.display='none';
+        newLi.innerText=todoText;
+        newLi.appendChild(editInput);
+        newLi.appendChild(createEditBtn());
+        newLi.appendChild(createDeleteBtn());
+        todoList.appendChild(newLi);
+        textInput.value='';
+        todos.push(todoText);
+        saveStatusList();
+      }
+
+      function createEditBtn() {
+        const editBtn=document.createElement('i');
+        editBtn.classList.add('fa');
+        editBtn.classList.add('fa-pencil');
+        return editBtn;
+      }
+
+      function createDeleteBtn() {
+        const deleteBtn=document.createElement('i');
+        deleteBtn.classList.add('fa');
+        deleteBtn.classList.add('fa-trash');
+        return deleteBtn;
+      }
+
+      function handleclick(event){
+        if(event.target.tagName==='I'){
+          if(event.target.classList.contains('fa-pencil')){
+            editTodo(event.target);
+          }
+          else if(event.target.classList.contains('fa-trash')){
+            removeTodo(event.target);
+          }
+        }
+        else if(event.target.tagName==='LI'){
+          event.target.classList.toggle('complited');
+        }
+      }
+
+      function editTodo(elem) {
+        const liNode=elem.parentNode;
+        const input=elem.parentNode.getElementsByTagName('input')[0];
+        const newinput=input.cloneNode();
+        input.style.display='inline-block';
+        input.value=liNode.innerText;
+        var index;
+        for (var i = 0; i < todos.length; i++) {
+          if(todos[i]===liNode.innerText){
+            index=i;
+          }
+        }
+        input.addEventListener('keydown', function() {
+          if(event.key==='Enter' && input.value!=""){
+            input.style.display='none';
+            liNode.innerText=input.value;
+            liNode.appendChild(newinput);
+            liNode.appendChild(createEditBtn());
+            liNode.appendChild(createDeleteBtn());
+            todos.splice(index, 1, input.value);
+            input.value='';
+            saveStatusList();
+          }
+        });
+      }
+
+      function removeTodo(elem) {
+        elem.parentNode.remove();
+        var index;
+        for (var i = 0; i < todos.length; i++) {
+          if(todos[i]===elem.parentNode.innerText){
+            index=i;
+          }
+        }
+        todos.splice(index, 1);
+        saveStatusList();
+        localStorage.removeItem('saveList.'+todos.length);
+      }
+    </script>
+  </body>
+</html>
